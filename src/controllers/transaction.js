@@ -1,5 +1,6 @@
         const knex = require("../db/connection");
         const isValidCPF = require("../utills/isValidCPF")
+        const accountant = require("../utills/accountant")
 
         async function cpfRegister(req, res) {
 
@@ -97,14 +98,14 @@
                             message: 'Erro ao depositar!'
                         })
                     }
-                       
-                        let date = new Date()
+
+                    let date = new Date()
 
 
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
                         date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora : `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+                        hora: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
                         type_transaction: "deposito",
                     });
 
@@ -128,7 +129,8 @@
                 cliente_id,
                 valor_saque,
                 type_transaction,
-                date_transaction
+                date_transaction,
+                opcao
             } = req.body;
 
             try {
@@ -176,16 +178,26 @@
                             message: 'Erro ao sacar!'
                         })
                     }
+
                     let date = new Date()
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
                         date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora : `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
-                        type_transaction: "deposito",
+                        hora: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+                        opcao,
+                        type_transaction: "saque",
                     });
 
                     return res.json({
                         status: 200,
+                        opcoes: {
+                            opcao1: accountant(valor_saque, 2),
+                            opcao2: accountant(valor_saque, 3),
+                            opcao3: accountant(valor_saque, 4),
+                            opcao4: accountant(valor_saque, 5),
+                            opcao5: accountant(valor_saque, 6),
+                            opcao6: accountant(valor_saque, 7),
+                        },
                         mensagem: 'Saque realizado com sucesso!'
                     });
                 }
@@ -215,24 +227,24 @@
                     }).first();
 
                     const allTransactions = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
-                   
-                    const allTransactionsCpf = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').where('clientes.cpf', cpf).select('clientes.name', 'clientes.cpf',  'clientes.saldo','transactions.*');
-                    
+
+                    const allTransactionsCpf = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').where('clientes.cpf', cpf).select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
+
                     const transactionswithdraw = await knex('transactions')
                         .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
                         .where({
                             type_transaction: 'saque',
                             cliente_id: `${verificarCPFExiste.id}`
-                        }).select('clientes.name', 'clientes.cpf','clientes.saldo', 'transactions.*')
+                        }).select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*')
                         .limit(4);
 
                     const transactionDeposit = await knex('transactions')
-                    .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
-                    .where({
-                        type_transaction: 'deposito',
-                        cliente_id: `${verificarCPFExiste.id}`
-                    }).select('clientes.name', 'clientes.cpf','clientes.saldo', 'transactions.*')
-                    .limit(4);
+                        .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
+                        .where({
+                            type_transaction: 'deposito',
+                            cliente_id: `${verificarCPFExiste.id}`
+                        }).select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*')
+                        .limit(4);
 
                     return res.json({
                         status: 200,
@@ -248,7 +260,7 @@
                     message: "cpf invalido!"
                 });
             } catch (error) {
-
+                return res.json(error.message);
             }
 
         }
