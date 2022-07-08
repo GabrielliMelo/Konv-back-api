@@ -17,6 +17,7 @@ create table transactions (
   	date_transaction date not null,
   	hora text not null,
     type_transaction text not null,
+	opcao text DEFAULT '0' not null
     CONSTRAINT FK_cliente_id FOREIGN KEY (cliente_id)REFERENCES clientes(id)
  );  
 
