@@ -105,7 +105,7 @@
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
                         date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora: `${date.getHours()}:${date.getMinutes()}:${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
+                        hora: `${String(date.getHours()).length === 1? "0" + date.getHours() : date.getHours()}:${String(date.getMinutes()).length === 1? "0" + date.getMinutes() : date.getMinutes()}: ${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
                         type_transaction: "deposito",
                     });
 
