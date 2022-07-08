@@ -58,13 +58,12 @@
         async function deposit(req, res) {
             const {
                 cpf,
-                valor_deposito
+                valor_deposito,
+                hora
             } = req.body;
-
 
             try {
                 if (isValidCPF(cpf)) {
-
                     if (!cpf) {
                         return res.status(400).json({
                             status: 400,
@@ -98,11 +97,15 @@
                             message: 'Erro ao depositar!'
                         })
                     }
+                       
+                        let date = new Date()
+
 
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
-                        date_transaction: new Date(),
-                        type_transaction: "deposito", 
+                        date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
+                        hora : `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+                        type_transaction: "deposito",
                     });
 
                     return res.json({
@@ -173,11 +176,12 @@
                             message: 'Erro ao sacar!'
                         })
                     }
-                    
+                    let date = new Date()
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
-                        date_transaction: new Date(),
-                        type_transaction: "saque", 
+                        date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
+                        hora : `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+                        type_transaction: "deposito",
                     });
 
                     return res.json({
@@ -194,9 +198,64 @@
             }
         }
 
+        async function extract(req, res) {
+            const {
+                cpf
+            } = req.body
+            try {
+                if (isValidCPF(cpf)) {
+                    if (!cpf) {
+                        return res.status(400).json({
+                            mensagem: 'Obrigatorio informar o cpf!'
+                        });
+                    }
+
+                    const verificarCPFExiste = await knex('clientes').where({
+                        cpf
+                    }).first();
+
+                    const allTransactions = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
+                   
+                    const allTransactionsCpf = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').where('clientes.cpf', cpf).select('clientes.name', 'clientes.cpf',  'clientes.saldo','transactions.*');
+                    
+                    const transactionswithdraw = await knex('transactions')
+                        .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
+                        .where({
+                            type_transaction: 'saque',
+                            cliente_id: `${verificarCPFExiste.id}`
+                        }).select('clientes.name', 'clientes.cpf','clientes.saldo', 'transactions.*')
+                        .limit(4);
+
+                    const transactionDeposit = await knex('transactions')
+                    .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
+                    .where({
+                        type_transaction: 'deposito',
+                        cliente_id: `${verificarCPFExiste.id}`
+                    }).select('clientes.name', 'clientes.cpf','clientes.saldo', 'transactions.*')
+                    .limit(4);
+
+                    return res.json({
+                        status: 200,
+                        allTransactions,
+                        allTransactionsCpf,
+                        transactionswithdraw,
+                        transactionDeposit
+                    });
+                }
+
+                res.status(404).json({
+                    status: 404,
+                    message: "cpf invalido!"
+                });
+            } catch (error) {
+
+            }
+
+        }
 
         module.exports = {
             cpfRegister,
             deposit,
-            withdraw
+            withdraw,
+            extract
         }
