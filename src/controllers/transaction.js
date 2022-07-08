@@ -105,7 +105,7 @@
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
                         date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+                        hora: `${date.getHours()}:${date.getMinutes()}:${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
                         type_transaction: "deposito",
                     });
 
@@ -180,10 +180,11 @@
                     }
 
                     let date = new Date()
+
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
                         date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+                        hora: `${date.getHours()}:${date.getMinutes()}:${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
                         opcao,
                         type_transaction: "saque",
                     });
