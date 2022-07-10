@@ -1,8 +1,49 @@
 # Konv-back-api
 
-# Para utilizar a api
+## Sobre o projeto
+
+	Projeto seguindo modelo de arquitetura em camadas, decompondo o projeto para facilitar a compreensão e sua manuntenção, seguindo boas praticas para alcançar o clean code. 
+	Foi construido o caixa eletrônico do Konv Mini Bank. A aplicação consiste em três aplicacões principais: 
+		- Depositos
+		- Saques
+		- Extratos
+			extra:
+			  -Transferencias
+	Todo cpf valido é cadastrado no banco para futuras transações.
+	Todas transações são salvas no banco de dados com as respectivas informacões:
+		- Id do cliente
+		- data 
+		- hora
+		- descrição 
+		- tipo da transação
+		- opcao de saque
+		- valor
+
+## Tecnologias utilizadas:
+
+	- JavaScript
+	- NodeJs
+	- Express
+	- Knex
+	- Nodemon
+	- Yup
+	- MySQL
+## Instrucoes para utilizar a api localmente
     
-    A aplicação será iniciada na porta 3008
+	- Clone este repositorio na sua maquina
+	- Abra-o (sugestao vsCode) -> code .
+	- Instale as dependencias -> No terminal rode npm i
+	- Configure a conexão com o banco de dados, pasta db -> seu user, password e database - konv_transactions.
+    - Configure o banco de dados colando a query disponivel no arquivo schema.sql (Utilizei o Beekeeper, segunda sugestao: MySQL workbench).
+	- Rode no terminal -> cd src ->  npx run .\index.js ou rode no modo dev -> npm run dev.
+	- Utilize Insomnia ou Postman (Utilizei o insomnia) para testar as requisicões.
+	
+	- A aplicação será iniciada na porta 3008
+
+	http://localhost:3008/deposit - rota para cadastrar deposito
+	http://localhost:3008/withdraw - rota para cadastrar saque
+	http://localhost:3008/extract/:cpf - rota para retornar extrato referente ao cpf 
+	http://localhost:3008/options/:valor_transaction - rota para retornar opcoes de saque
 
 # Status code
 
@@ -45,6 +86,28 @@
 	"value_transaction": 1500,
 	"description":"Testando deposito"
 }
+
+// Exemplo de resposta - Sucesso
+
+{
+	"status": 200,
+	"mensagem": "Saque realizado com sucesso!"
+}
+
+// erros 
+
+{
+	"message": "Cpf inválido"
+}
+
+{
+	"message": "o valor Deve ser no mínimo 2 reais"
+}
+
+{
+	"message": "É necessário informar uma descrição"
+}
+
 ```
 
 ## Saque
@@ -268,5 +331,27 @@
 			"opcao": " 1 nota(s) de R$ 100,00, 0 nota(s) de R$ 50,00, 1 nota(s) de R$ 20,00, 1 nota(s) de R$ 10,00, 1 nota(s) de R$ 5,00, 2 nota(s) de R$ 2,00"
 		}
 	]
+}
+```
+
+## Desenvolvedora 
+
+``` json
+{
+	"nome": "Gabrielli Melo da silva Borges",
+	"Idade": "23",
+	"Nivel Atual": "Júnior / Pleno",
+	"Competências": ["HTLM", "CSS","JavaScript", "NodeJs", "ReactJs", "Java", "Spring Boot", "Docker", "AWS", "PostgreSQL", "MySQL", "Redis", "API Rest", "Scrum", "Kanbam", "Git/GitFlow"],
+	"Habilidades": ["Comunicação", "Empatia", "Trabalho em equipe", "Positividade", "Proatividade", "Resolução de problemas", "...etc"],
+	"Sobre_mim": "Olá, me chamo Gabrielli Melo, tenho 23 anos e fiz transição de carreira
+da engenharia química para programação. Desde pequena apaixonada por jogos e
+desenvolvimento de software, mais precisamente desenvolvimento web. Sempre tive
+curiosidade em saber como tudo isso funciona por debaixo dos panos e por conta disso
+decidi ser uma desenvolvedora. Hoje, após 1 ano na área, venho estudando e me
+especializando no ecossistema javascript com foco no desenvolvimento fullStack utilizando nodeJs,
+ReactJs, typescript e todas as suas ferramentas. tenho experiência também em
+desenvolvimento de apis, utilizando spring boot, e banco de dados PostgreSQL e
+MySQL.
+"
 }
 ```
