@@ -13,7 +13,7 @@ create table clientes (
   
 create table transactions (
   	id serial primary key,
-    cliente_id BIGINT UNSIGNED not null,
+    cliente_id serial not null,
   	date_transaction date not null,
   	hora text not null,
   	description text not null,

@@ -1,81 +1,22 @@
         const knex = require("../db/connection");
         const isValidCPF = require("../utills/isValidCPF")
-        const validacoes = require("../utills/validacoes")
         const accountant = require("../utills/accountant")
+        const TransactionService = require("../services/TransactionService");
 
         async function deposit(req, res) {
-            const {
-                cpf,
-                valor,
-                description
-            } = req.body;
-
-            try {
-                
-                if (!cpf) {
-                    return res.status(400).json({
-                        mensagem: 'Preencha o cpf!'
-                    });
-                }
-            
-                if (!description) {
-                    return res.status(400).json({
-                        mensagem: 'Preencha a descricao!'
-                    });
-                }
-            
-                if (valor <= 0 || !valor) {
-                    return res.status(400).json({
-                        mensagem: 'Valor de deposito invalido!',
-                    });
-                }
-
-                if (isValidCPF(cpf)) {
-
-                    const verificarCPFExiste = await knex('clientes').where({
-                        cpf
-                    }).first();
-
-                    if (!verificarCPFExiste) {
-                        return res.status(404).json({
-                            mensagem: 'Cpf nao encontrado no banco de dados!'
-                        });
-                    }
-
-                    const {
-                        rowCount
-                    } = await knex('clientes').where('id', verificarCPFExiste.id).update('saldo', verificarCPFExiste.saldo + valor);
-
-                    if (rowCount === 0) {
-                        return res.status(500).json({
-                            status: 500,
-                            message: 'Erro ao depositar!'
-                        })
-                    }
-
-                    let date = new Date()
-                    await knex('transactions').insert({
-                        cliente_id: verificarCPFExiste.id,
-                        date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora: `${String(date.getHours()).length === 1? "0" + date.getHours() : date.getHours()}:${String(date.getMinutes()).length === 1? "0" + date.getMinutes() : date.getMinutes()}: ${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
-                        type_transaction: "deposito",
-                        valor,
-                        description
-                    });
-
-                    return res.json({
-                        status: 200,
-                        mensagem: 'Deposito realizado com sucesso!'
-                    });
-                }
-                res.status(404).json({
-                    status: 404,
-                    message: "cpf invalido!"
-                });
-            } catch (error) {
-                return res.json(error.message);
-            }
-        }
+            const { cpf, value, description } = req.body;
+          
+            await TransactionService.deposit({
+              cpf,
+              value,
+              description,
+            });
+          
+            return res.json({
+              status: 200,
+              mensagem: "Deposito realizado com sucesso!",
+            });
+          }
 
         async function withdraw(req, res) {
             const {
@@ -94,13 +35,13 @@
                         mensagem: 'Preencha o cpf!'
                     });
                 }
-            
+
                 if (!description) {
                     return res.status(400).json({
                         mensagem: 'Preencha a descricao!'
                     });
                 }
-            
+
                 if (valor <= 0 || !valor) {
                     return res.status(400).json({
                         mensagem: 'Valor de deposito invalido!',
@@ -165,14 +106,14 @@
                     status: 200,
                     mensagem: 'Saque realizado com sucesso!'
                 });
-                
+
             } catch (error) {
                 return res.json(error.message);
             }
         }
 
         async function extract(req, res) {
-            
+
             const {
                 cpf
             } = req.params;
@@ -184,7 +125,7 @@
                         cpf
                     }).first();
 
-                    if(!verificarCPFExiste){
+                    if (!verificarCPFExiste) {
                         throw new Error("Cpf nao cadastrado")
                     }
 
