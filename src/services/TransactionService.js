@@ -135,10 +135,14 @@ async function transfer({
   cpf_transfer
 }) {
 
-  if(cpf === cpf_transfer){
+  if (cpf === cpf_transfer) {
     throw new Error("Não é possivel transferir para a mesma conta!");
   }
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
+
+  if (clientExists.balance === 0 || clientExists.balance < value_transaction) {
+    throw new Error("Salvo insuficiente")
+  }
   
   let clientTransferExists = await TransactionRepository.getClientByCpf(cpf_transfer);
 
@@ -157,15 +161,15 @@ async function transfer({
   const {
     rowCount
   } = await TransactionRepository.updateBalance({
-    clientId: clientExists.id,
-    value_transaction: clientExists.balance + value_transaction,
+    clientId: clientTransferExists.id,
+    value_transaction: clientTransferExists.balance + value_transaction,
   });
 
   const {
     rowCount: rowCount2
   } = await TransactionRepository.updateBalance({
-    clientId: clientTransferExists.id,
-    value_transaction: clientTransferExists.balance - value_transaction,
+    clientId: clientExists.id,
+    value_transaction: clientExists.balance - value_transaction,
   });
 
   if (rowCount === 0) {
