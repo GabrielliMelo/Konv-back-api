@@ -81,5 +81,5 @@ module.exports = {
   updateBalance,
   createTransaction,
   getAllTransactionsByCpf,
-  getTransactionsByType
+  getTransactionsByType,
 };

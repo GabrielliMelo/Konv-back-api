@@ -1,11 +1,12 @@
 const TransactionRepository = require("../repositories/TransactionRepository");
+const AccountService = require("./AccountService");
 const accountant = require("../utills/accountant");
 
 async function deposit({ cpf, value, description }) {
-  const clientExists = await TransactionRepository.getClientByCpf(cpf);
+  let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
-    throw new Error("Cpf nao encontrado no banco de dados!");
+    clientExists = await AccountService.createAccount({ cpf });
   }
 
   const { rowCount } = await TransactionRepository.updateBalance({
@@ -26,10 +27,10 @@ async function deposit({ cpf, value, description }) {
 }
 
 async function withdraw({ cpf, value, description, option }) {
-  const clientExists = await TransactionRepository.getClientByCpf(cpf);
+  let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
-    throw new Error("Cpf nao encontrado no banco de dados!");
+    clientExists = await AccountService.createAccount({ cpf });
   }
 
   if (clientExists.saldo <= 0 || clientExists.saldo < value) {
@@ -55,10 +56,10 @@ async function withdraw({ cpf, value, description, option }) {
 }
 
 async function extract({ cpf }) {
-  const clientExists = await TransactionRepository.getClientByCpf(cpf);
+  let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
-    throw new Error("Cpf nao cadastrado");
+    clientExists = await AccountService.createAccount({ cpf });
   }
 
   const allTransactionsCpf =
@@ -111,5 +112,5 @@ module.exports = {
   deposit,
   withdraw,
   extract,
-  getWithdrawOptions
+  getWithdrawOptions,
 };
