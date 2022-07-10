@@ -45,8 +45,41 @@ async function createTransaction({
   });
 }
 
+async function getAllTransactionsByCpf(cpf) {
+  const transactions = await knex("transactions")
+    .join("clientes", "transactions.cliente_id", "=", "clientes.id")
+    .where("clientes.cpf", cpf)
+    .select(
+      "clientes.name",
+      "clientes.cpf",
+      "clientes.saldo",
+      "transactions.*"
+    );
+
+  return transactions;
+}
+
+async function getTransactionsByType({ clientId, type }) {
+  const transactions = await knex("transactions")
+    .join("clientes", "transactions.cliente_id", "=", "clientes.id")
+    .where({
+      type_transaction: type,
+      cliente_id: clientId,
+    })
+    .select(
+      "clientes.name",
+      "clientes.cpf",
+      "clientes.saldo",
+      "transactions.*"
+    );
+
+  return transactions;
+}
+
 module.exports = {
   getClientByCpf,
   updateBalance,
   createTransaction,
+  getAllTransactionsByCpf,
+  getTransactionsByType
 };

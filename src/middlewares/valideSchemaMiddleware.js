@@ -1,7 +1,11 @@
 const validateSchemaMiddleware = (schema) => {
   return async function (request, response, next) {
     try {
-      await schema.validate(request.body);
+      const objectToValidate = !Object.keys(request.body).length
+        ? request.params
+        : request.body;
+
+      await schema.validate(objectToValidate);
 
       next();
     } catch (error) {

@@ -53,7 +53,36 @@ async function withdraw({ cpf, value, description, option }) {
     description,
   });
 }
+
+async function extract({ cpf }) {
+  const clientExists = await TransactionRepository.getClientByCpf(cpf);
+
+  if (!clientExists) {
+    throw new Error("Cpf nao cadastrado");
+  }
+
+  const allTransactionsCpf =
+    await TransactionRepository.getAllTransactionsByCpf(cpf);
+
+  const transactionswithdraw =
+    await TransactionRepository.getTransactionsByType({
+      type: "saque",
+      clientId: clientExists.id,
+    });
+
+  const transactionDeposit = await TransactionRepository.getTransactionsByType({
+    type: "deposito",
+    clientId: clientExists.id,
+  });
+
+  return {
+    allTransactionsCpf,
+    transactionswithdraw,
+    transactionDeposit,
+  };
+}
 module.exports = {
   deposit,
-  withdraw
+  withdraw,
+  extract
 };

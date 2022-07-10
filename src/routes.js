@@ -1,4 +1,6 @@
-const { Router } = require("express");
+const {
+  Router
+} = require("express");
 const {
   deposit,
   withdraw,
@@ -6,12 +8,18 @@ const {
   options,
 } = require("./controllers/transaction");
 const validateSchemaMiddleware = require("./middlewares/valideSchemaMiddleware");
-const { makeDepositSchema, makeWithdrawSchema } = require("./schemas/schemas");
+const {
+  makeDepositSchema,
+  makeWithdrawSchema,
+  generateExtractSchema
+} = require("./schemas/schemas");
 
 const routes = Router();
 
 routes.get("/servidor", (req, res) => {
-  res.status(200).json({ message: "Servidor ok!!" });
+  res.status(200).json({
+    message: "Servidor ok!!"
+  });
 });
 
 routes.post("/deposit", validateSchemaMiddleware(makeDepositSchema), deposit);
@@ -20,7 +28,12 @@ routes.post(
   validateSchemaMiddleware(makeWithdrawSchema),
   withdraw
 );
-routes.get("/extract/:cpf", extract);
+
+routes.get(
+  "/extract/:cpf",
+  validateSchemaMiddleware(generateExtractSchema),
+  extract
+);
 routes.get("/options/:valor_saque", options);
 
 module.exports = routes;

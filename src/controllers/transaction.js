@@ -32,59 +32,19 @@
         }
 
         async function extract(req, res) {
-
-            const {
-                cpf
-            } = req.params;
-
-            try {
-                if (isValidCPF(cpf)) {
-
-                    const verificarCPFExiste = await knex('clientes').where({
-                        cpf
-                    }).first();
-
-                    if (!verificarCPFExiste) {
-                        throw new Error("Cpf nao cadastrado")
-                    }
-
-                    const allTransactionsCpf = await knex('transactions')
-                        .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
-                        .where('clientes.cpf', cpf)
-                        .select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
-
-                    const transactionswithdraw = await knex('transactions')
-                        .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
-                        .where({
-                            type_transaction: 'saque',
-                            cliente_id: `${verificarCPFExiste.id}`
-                        }).select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*')
-                        .limit(4);
-
-                    const transactionDeposit = await knex('transactions')
-                        .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
-                        .where({
-                            type_transaction: 'deposito',
-                            cliente_id: `${verificarCPFExiste.id}`
-                        }).select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*')
-                        .limit(4);
-
-                    return res.json({
-                        allTransactionsCpf,
-                        transactionswithdraw,
-                        transactionDeposit
-                    });
-                }
-
-                res.status(404).json({
-                    status: 404,
-                    message: "cpf invalido!"
-                });
-            } catch (error) {
-                return res.json(error.message);
-            }
-
-        }
+            const { cpf } = req.params;
+          
+            const { allTransactionsCpf, transactionDeposit, transactionswithdraw } =
+              await TransactionService.extract({
+                cpf,
+              });
+          
+            return res.json({
+              allTransactionsCpf,
+              transactionswithdraw,
+              transactionDeposit,
+            });
+          }
 
         async function options(req, res) {
 
