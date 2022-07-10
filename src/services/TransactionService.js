@@ -2,14 +2,22 @@ const TransactionRepository = require("../repositories/TransactionRepository");
 const AccountService = require("./AccountService");
 const accountant = require("../utills/accountant");
 
-async function deposit({ cpf, value_transaction, description }) {
+async function deposit({
+  cpf,
+  value_transaction,
+  description
+}) {
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
-    clientExists = await AccountService.createAccount({ cpf });
+    clientExists = await AccountService.createAccount({
+      cpf
+    });
   }
 
-  const { rowCount } = await TransactionRepository.updateBalance({
+  const {
+    rowCount
+  } = await TransactionRepository.updateBalance({
     clientId: clientExists.id,
     value_transaction: clientExists.balance + value_transaction,
   });
@@ -26,18 +34,27 @@ async function deposit({ cpf, value_transaction, description }) {
   });
 }
 
-async function withdraw({ cpf, value_transaction, description, option_transaction }) {
+async function withdraw({
+  cpf,
+  value_transaction,
+  description,
+  option_transaction
+}) {
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
-    clientExists = await AccountService.createAccount({ cpf });
+    clientExists = await AccountService.createAccount({
+      cpf
+    });
   }
 
   if (clientExists.balance <= 0 || clientExists.balance < value_transaction) {
     throw new Error("Saldo insuficiente!");
   }
 
-  const { rowCount } = await TransactionRepository.updateBalance({
+  const {
+    rowCount
+  } = await TransactionRepository.updateBalance({
     clientId: clientExists.id,
     value_transaction: clientExists.balance - value_transaction,
   });
@@ -55,11 +72,15 @@ async function withdraw({ cpf, value_transaction, description, option_transactio
   });
 }
 
-async function extract({ cpf }) {
+async function extract({
+  cpf
+}) {
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
-    clientExists = await AccountService.createAccount({ cpf });
+    clientExists = await AccountService.createAccount({
+      cpf
+    });
   }
 
   const allTransactionsCpf =
@@ -85,8 +106,7 @@ async function extract({ cpf }) {
 
 function getWithdrawOptions(withdrawValue) {
   return {
-    opcoes: [
-      {
+    opcoes: [{
         opcao: accountant(withdrawValue, 2),
       },
       {
@@ -108,9 +128,68 @@ function getWithdrawOptions(withdrawValue) {
   };
 }
 
+async function transfer({
+  cpf,
+  value_transaction,
+  description,
+  cpf_transfer
+}) {
+
+  if(cpf === cpf_transfer){
+    throw new Error("Não é possivel transferir para a mesma conta!");
+  }
+  let clientExists = await TransactionRepository.getClientByCpf(cpf);
+  
+  let clientTransferExists = await TransactionRepository.getClientByCpf(cpf_transfer);
+
+  if (!clientExists) {
+    clientExists = await AccountService.createAccount({
+      cpf
+    });
+  }
+
+  if (!clientTransferExists) {
+    clientTransferExists = await AccountService.createAccount({
+      cpf_transfer
+    });
+  }
+
+  const {
+    rowCount
+  } = await TransactionRepository.updateBalance({
+    clientId: clientExists.id,
+    value_transaction: clientExists.balance + value_transaction,
+  });
+
+  const {
+    rowCount: rowCount2
+  } = await TransactionRepository.updateBalance({
+    clientId: clientTransferExists.id,
+    value_transaction: clientTransferExists.balance - value_transaction,
+  });
+
+  if (rowCount === 0) {
+    throw new Error("Erro ao Tranferir!");
+  }
+
+  if (rowCount2 === 0) {
+    throw new Error("Erro ao receber transferencia!");
+  }
+
+  await TransactionRepository.createTransaction({
+    clientId: clientExists.id,
+    type: "Transferencia",
+    value_transaction,
+    description,
+    cpf_transfer
+  });
+}
+
+
 module.exports = {
   deposit,
   withdraw,
   extract,
+  transfer,
   getWithdrawOptions,
 };
