@@ -1,82 +1,36 @@
         const knex = require("../db/connection");
         const isValidCPF = require("../utills/isValidCPF")
+        const validacoes = require("../utills/validacoes")
         const accountant = require("../utills/accountant")
-
-        async function cpfRegister(req, res) {
-
-            const {
-                name,
-                cpf,
-                password
-            } = req.body;
-
-            try {
-                if (isValidCPF(cpf)) {
-                    const verificarCPFExiste = await knex('clientes').where({
-                        cpf
-                    }).first();
-
-                    if (verificarCPFExiste) {
-                        return res.status(400).json({
-                            status: 400,
-                            message: "Já existe um cliente com estes dados!"
-                        })
-                    }
-
-                    const {
-                        rowCount
-                    } = await knex('clientes').insert({
-                        name,
-                        cpf,
-                        password
-                    });
-
-
-                    if (rowCount === 0) {
-                        return res.status(404).json({
-                            status: 404,
-                            message: "Ocorreu um erro ao cadastrar o cliente!"
-                        })
-                    }
-
-                    return res.status(201).json({
-                        status: 201,
-                        message: "cpf cadastrado com sucesso!"
-                    });
-                }
-
-                res.status(404).json({
-                    status: 404,
-                    message: "cpf invalido!"
-                });
-
-
-            } catch (error) {
-                return res.json(error.message);
-            }
-        };
 
         async function deposit(req, res) {
             const {
                 cpf,
-                valor_deposito,
-                hora
+                valor,
+                description
             } = req.body;
 
             try {
-                if (isValidCPF(cpf)) {
-                    if (!cpf) {
-                        return res.status(400).json({
-                            status: 400,
-                            mensagem: 'Preencha o cpf!'
-                        });
-                    }
+                
+                if (!cpf) {
+                    return res.status(400).json({
+                        mensagem: 'Preencha o cpf!'
+                    });
+                }
+            
+                if (!description) {
+                    return res.status(400).json({
+                        mensagem: 'Preencha a descricao!'
+                    });
+                }
+            
+                if (valor <= 0 || !valor) {
+                    return res.status(400).json({
+                        mensagem: 'Valor de deposito invalido!',
+                    });
+                }
 
-                    if (valor_deposito <= 0 || !valor_deposito) {
-                        return res.status(400).json({
-                            mensagem: 'Valor de deposito invalido!',
-                        });
-                    }
+                if (isValidCPF(cpf)) {
 
                     const verificarCPFExiste = await knex('clientes').where({
                         cpf
@@ -90,7 +44,7 @@
 
                     const {
                         rowCount
-                    } = await knex('clientes').where('id', verificarCPFExiste.id).update('saldo', verificarCPFExiste.saldo + valor_deposito);
+                    } = await knex('clientes').where('id', verificarCPFExiste.id).update('saldo', verificarCPFExiste.saldo + valor);
 
                     if (rowCount === 0) {
                         return res.status(500).json({
@@ -100,13 +54,13 @@
                     }
 
                     let date = new Date()
-
-
                     await knex('transactions').insert({
                         cliente_id: verificarCPFExiste.id,
                         date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
                         hora: `${String(date.getHours()).length === 1? "0" + date.getHours() : date.getHours()}:${String(date.getMinutes()).length === 1? "0" + date.getMinutes() : date.getMinutes()}: ${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
                         type_transaction: "deposito",
+                        valor,
+                        description
                     });
 
                     return res.json({
@@ -127,109 +81,117 @@
             const {
                 cpf,
                 cliente_id,
-                valor_saque,
+                valor,
                 type_transaction,
                 date_transaction,
-                opcao
+                opcao,
+                description
             } = req.body;
 
             try {
-                if (isValidCPF(cpf)) {
-
-                    if (!cpf) {
-                        return res.status(400).json({
-                            status: 400,
-                            mensagem: 'Preencha o cpf!'
-                        });
-                    }
-
-                    if (valor_saque <= 0 || !valor_saque) {
-                        return res.status(400).json({
-                            status: 400,
-                            mensagem: 'Valor de saque invalido!',
-                        });
-                    }
-
-                    const verificarCPFExiste = await knex('clientes').where({
-                        cpf
-                    }).first();
-
-                    if (!verificarCPFExiste) {
-                        return res.status(404).json({
-                            status: 400,
-                            mensagem: 'Cpf nao encontrado no banco de dados!'
-                        });
-                    }
-
-                    if (verificarCPFExiste.saldo <= 0 || verificarCPFExiste.saldo < valor_saque) {
-                        return res.status(404).json({
-                            status: 400,
-                            mensagem: 'Saldo insuficiente!'
-                        });
-                    }
-
-                    const {
-                        rowCount
-                    } = await knex('clientes').where('id', verificarCPFExiste.id).update('saldo', verificarCPFExiste.saldo - valor_saque);
-
-                    if (rowCount === 0) {
-                        return res.status(500).json({
-                            status: 500,
-                            message: 'Erro ao sacar!'
-                        })
-                    }
-
-                    let date = new Date()
-
-                    await knex('transactions').insert({
-                        cliente_id: verificarCPFExiste.id,
-                        date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                        hora: `${date.getHours()}:${date.getMinutes()}:${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
-                        opcao,
-                        type_transaction: "saque",
-                    });
-
-                    return res.json({
-                        status: 200,
-                        opcoes: {
-                            opcao1: accountant(valor_saque, 2),
-                            opcao2: accountant(valor_saque, 3),
-                            opcao3: accountant(valor_saque, 4),
-                            opcao4: accountant(valor_saque, 5),
-                            opcao5: accountant(valor_saque, 6),
-                            opcao6: accountant(valor_saque, 7),
-                        },
-                        mensagem: 'Saque realizado com sucesso!'
+                if (!cpf) {
+                    return res.status(400).json({
+                        mensagem: 'Preencha o cpf!'
                     });
                 }
-                res.status(404).json({
-                    status: 404,
-                    message: "cpf invalido!"
+            
+                if (!description) {
+                    return res.status(400).json({
+                        mensagem: 'Preencha a descricao!'
+                    });
+                }
+            
+                if (valor <= 0 || !valor) {
+                    return res.status(400).json({
+                        mensagem: 'Valor de deposito invalido!',
+                    });
+                }
+
+                if (!opcao) {
+                    return res.status(400).json({
+                        mensagem: 'Escolha uma opcao!',
+                    });
+                }
+                if (!isValidCPF(cpf)) {
+                    res.status(404).json({
+                        status: 404,
+                        message: "cpf invalido!"
+                    });
+                }
+
+
+                const verificarCPFExiste = await knex('clientes').where({
+                    cpf
+                }).first();
+
+                if (!verificarCPFExiste) {
+                    return res.status(404).json({
+                        status: 400,
+                        mensagem: 'Cpf nao encontrado no banco de dados!'
+                    });
+                }
+
+                if (verificarCPFExiste.saldo <= 0 || verificarCPFExiste.saldo < valor) {
+                    return res.status(404).json({
+                        status: 400,
+                        mensagem: 'Saldo insuficiente!'
+                    });
+                }
+
+                const {
+                    rowCount
+                } = await knex('clientes').where('id', verificarCPFExiste.id).update('saldo', verificarCPFExiste.saldo - valor);
+
+                if (rowCount === 0) {
+                    return res.status(500).json({
+                        status: 500,
+                        message: 'Erro ao sacar!'
+                    })
+                }
+
+                let date = new Date()
+
+                await knex('transactions').insert({
+                    cliente_id: verificarCPFExiste.id,
+                    date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
+                    hora: `${date.getHours()}:${date.getMinutes()}:${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
+                    opcao,
+                    valor,
+                    description,
+                    type_transaction: "saque",
                 });
+
+                return res.json({
+                    status: 200,
+                    mensagem: 'Saque realizado com sucesso!'
+                });
+                
             } catch (error) {
                 return res.json(error.message);
             }
         }
 
         async function extract(req, res) {
+            
             const {
                 cpf
-            } = req.body
+            } = req.params;
+
             try {
                 if (isValidCPF(cpf)) {
-                    if (!cpf) {
-                        return res.status(400).json({
-                            mensagem: 'Obrigatorio informar o cpf!'
-                        });
-                    }
 
                     const verificarCPFExiste = await knex('clientes').where({
                         cpf
                     }).first();
 
-                    const allTransactions = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
+                    if(!verificarCPFExiste){
+                        throw new Error("Cpf nao cadastrado")
+                    }
 
-                    const allTransactionsCpf = await knex('transactions').join('clientes', 'transactions.cliente_id', '=', 'clientes.id').where('clientes.cpf', cpf).select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
+                    const allTransactionsCpf = await knex('transactions')
+                        .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
+                        .where('clientes.cpf', cpf)
+                        .select('clientes.name', 'clientes.cpf', 'clientes.saldo', 'transactions.*');
 
                     const transactionswithdraw = await knex('transactions')
                         .join('clientes', 'transactions.cliente_id', '=', 'clientes.id')
@@ -248,8 +210,6 @@
                         .limit(4);
 
                     return res.json({
-                        status: 200,
-                        allTransactions,
                         allTransactionsCpf,
                         transactionswithdraw,
                         transactionDeposit
@@ -266,9 +226,42 @@
 
         }
 
+        async function options(req, res) {
+
+            let {
+                valor_saque
+            } = req.params;
+            try {
+
+                return res.json({
+                    opcoes: [{
+                            opcao: accountant(valor_saque, 2)
+                        },
+                        {
+                            opcao: accountant(valor_saque, 3)
+                        },
+                        {
+                            opcao: accountant(valor_saque, 4)
+                        },
+                        {
+                            opcao: accountant(valor_saque, 5)
+                        },
+                        {
+                            opcao: accountant(valor_saque, 6)
+                        },
+                        {
+                            opcao: accountant(valor_saque, 7)
+                        },
+                    ]
+                });
+
+            } catch (error) {
+                return res.json(error.message);
+            }
+        }
         module.exports = {
-            cpfRegister,
             deposit,
             withdraw,
-            extract
+            extract,
+            options
         }

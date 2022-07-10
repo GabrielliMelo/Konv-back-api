@@ -16,12 +16,14 @@ create table transactions (
     cliente_id BIGINT UNSIGNED not null,
   	date_transaction date not null,
   	hora text not null,
+  	description text not null,
     type_transaction text not null,
-	opcao text DEFAULT '0' not null
+	opcao integer DEFAULT '0' not null,
+  	valor BIGINT DEFAULT 0 not null,
     CONSTRAINT FK_cliente_id FOREIGN KEY (cliente_id)REFERENCES clientes(id)
  );  
 
-
+delete from transactions
 
 
 
