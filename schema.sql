@@ -14,7 +14,7 @@ create table transactions (
     type_transaction text not null,
 	  option_transaction integer DEFAULT '0' not null,
   	value_transaction BIGINT DEFAULT 0 not null,
-  	cpf_transfer varchar(15),
-    CONSTRAINT FK_cliente_id FOREIGN KEY (cliente_id)REFERENCES clientes(id)
+  	cpf_transfer VARCHAR(15),
+    CONSTRAINT FK_cliente_id FOREIGN KEY (cliente_id)REFERENCES clients(id)
  ); 
  
