@@ -20,6 +20,7 @@ async function createTransaction({
   value_transaction,
   description,
   option_transaction = 0,
+  cpf_transfer
 }) {
   let date = new Date();
   await knex("transactions").insert({
@@ -42,6 +43,7 @@ async function createTransaction({
     option_transaction,
     value_transaction,
     description,
+    cpf_transfer
   });
 }
 

@@ -28,6 +28,15 @@
             });
         }
 
+        async function transfer(req, res) {
+          await TransactionService.transfer(req.body);
+
+          return res.json({
+              status: 200,
+              mensagem: "Transferencia realizada com sucesso!",
+          });
+      }
+
         async function extract(req, res) {
             const { cpf } = req.params;
           
@@ -41,7 +50,7 @@
               transactionswithdraw,
               transactionDeposit,
             });
-          }
+        }
 
           async function getWithdrawOptions(req, res) {
             let { withdrawValue } = req.params;
@@ -55,5 +64,6 @@
             deposit,
             withdraw,
             extract,
-            getWithdrawOptions
+            getWithdrawOptions,
+            transfer
         }

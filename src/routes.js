@@ -3,7 +3,8 @@ const {
   deposit,
   withdraw,
   extract,
-  getWithdrawOptions,
+  transfer,
+  getWithdrawOptions
 } = require("./controllers/transaction");
 const validateSchemaMiddleware = require("./middlewares/valideSchemaMiddleware");
 const {
@@ -11,6 +12,7 @@ const {
   makeWithdrawSchema,
   generateExtractSchema,
   getWithdrawOptionsSchema,
+  makeTransferSchema
 } = require("./schemas/schemas");
 
 const routes = Router();
@@ -34,6 +36,12 @@ routes.get(
   "/options/:withdrawValue",
   validateSchemaMiddleware(getWithdrawOptionsSchema),
   getWithdrawOptions
+);
+
+routes.post(
+  "/transfer",
+  validateSchemaMiddleware(makeTransferSchema),
+  transfer
 );
 
 module.exports = routes;

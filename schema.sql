@@ -1,4 +1,4 @@
-create table clients (
+create table clientes (
       id serial primary key,
       name text not null,
       cpf VARCHAR(15) unique not null,
@@ -12,8 +12,9 @@ create table transactions (
   	hour text not null,
   	description text not null,
     type_transaction text not null,
-	  option_transaction integer DEFAULT '0' not null,
+	option_transaction integer DEFAULT '0' not null,
   	value_transaction BIGINT DEFAULT 0 not null,
-    CONSTRAINT FK_cliente_id FOREIGN KEY (cliente_id)REFERENCES clients(id)
+  	cpf_transfer varchar(15),
+    CONSTRAINT FK_cliente_id FOREIGN KEY (cliente_id)REFERENCES clientes(id)
  ); 
  
