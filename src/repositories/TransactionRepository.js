@@ -1,7 +1,7 @@
 const knex = require("../db/connection");
 
 async function getClientByCpf(cpf) {
-  const client = await knex("clientes")
+  const client = await knex("clients")
     .where({
       cpf,
     })
@@ -10,22 +10,22 @@ async function getClientByCpf(cpf) {
   return client;
 }
 
-async function updateBalance({ clientId, value }) {
-  return await knex("clientes").where("id", clientId).update("saldo", value);
+async function updateBalance({ clientId, value_transaction }) {
+  return await knex("clients").where("id", clientId).update("balance", value_transaction);
 }
 
 async function createTransaction({
   clientId,
   type,
-  value,
+  value_transaction,
   description,
-  option = 0,
+  option_transaction = 0,
 }) {
   let date = new Date();
   await knex("transactions").insert({
     cliente_id: clientId,
     date_transaction: `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
-    hora: `${
+    hour: `${
       String(date.getHours()).length === 1
         ? "0" + date.getHours()
         : date.getHours()
@@ -39,20 +39,20 @@ async function createTransaction({
         : date.getSeconds()
     }`,
     type_transaction: type,
-    opcao: option,
-    valor: value,
+    option_transaction,
+    value_transaction,
     description,
   });
 }
 
 async function getAllTransactionsByCpf(cpf) {
   const transactions = await knex("transactions")
-    .join("clientes", "transactions.cliente_id", "=", "clientes.id")
-    .where("clientes.cpf", cpf)
+    .join("clients", "transactions.cliente_id", "=", "clients.id")
+    .where("clients.cpf", cpf)
     .select(
-      "clientes.name",
-      "clientes.cpf",
-      "clientes.saldo",
+      "clients.name",
+      "clients.cpf",
+      "clients.balance",
       "transactions.*"
     );
 
@@ -61,15 +61,15 @@ async function getAllTransactionsByCpf(cpf) {
 
 async function getTransactionsByType({ clientId, type }) {
   const transactions = await knex("transactions")
-    .join("clientes", "transactions.cliente_id", "=", "clientes.id")
+    .join("clients", "transactions.cliente_id", "=", "clients.id")
     .where({
       type_transaction: type,
       cliente_id: clientId,
     })
     .select(
-      "clientes.name",
-      "clientes.cpf",
-      "clientes.saldo",
+      "clients.name",
+      "clients.cpf",
+      "clients.balance",
       "transactions.*"
     );
 

@@ -3,13 +3,13 @@
         async function deposit(req, res) {
             const {
                 cpf,
-                value,
+                value_transaction,
                 description
             } = req.body;
 
             await TransactionService.deposit({
                 cpf,
-                value,
+                value_transaction,
                 description,
             });
 

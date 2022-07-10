@@ -2,7 +2,7 @@ const TransactionRepository = require("../repositories/TransactionRepository");
 const AccountService = require("./AccountService");
 const accountant = require("../utills/accountant");
 
-async function deposit({ cpf, value, description }) {
+async function deposit({ cpf, value_transaction, description }) {
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
@@ -11,7 +11,7 @@ async function deposit({ cpf, value, description }) {
 
   const { rowCount } = await TransactionRepository.updateBalance({
     clientId: clientExists.id,
-    value: clientExists.saldo + value,
+    value_transaction: clientExists.balance + value_transaction,
   });
 
   if (rowCount === 0) {
@@ -21,25 +21,25 @@ async function deposit({ cpf, value, description }) {
   await TransactionRepository.createTransaction({
     clientId: clientExists.id,
     type: "deposito",
-    value,
+    value_transaction,
     description,
   });
 }
 
-async function withdraw({ cpf, value, description, option }) {
+async function withdraw({ cpf, value_transaction, description, option_transaction }) {
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (!clientExists) {
     clientExists = await AccountService.createAccount({ cpf });
   }
 
-  if (clientExists.saldo <= 0 || clientExists.saldo < value) {
+  if (clientExists.balance <= 0 || clientExists.balance < value_transaction) {
     throw new Error("Saldo insuficiente!");
   }
 
   const { rowCount } = await TransactionRepository.updateBalance({
     clientId: clientExists.id,
-    value: clientExists.saldo - value,
+    value_transaction: clientExists.balance - value_transaction,
   });
 
   if (rowCount === 0) {
@@ -49,8 +49,8 @@ async function withdraw({ cpf, value, description, option }) {
   await TransactionRepository.createTransaction({
     clientId: clientExists.id,
     type: "saque",
-    option,
-    value,
+    option_transaction,
+    value_transaction,
     description,
   });
 }

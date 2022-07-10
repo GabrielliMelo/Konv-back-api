@@ -10,7 +10,7 @@ exports.makeDepositSchema = Yup.object({
       message: "Cpf inválido",
       test: (value) => isValidCPF(value),
     }),
-  value: Yup.number("Deve ser um número")
+  value_transaction: Yup.number("Deve ser um número")
     .min(1, "Deve ser no mínimo 1")
     .required("É necessário informar o valor"),
   description: Yup.string("Deve ser uma string").required(
@@ -27,13 +27,13 @@ exports.makeWithdrawSchema = Yup.object({
       message: "Cpf inválido",
       test: (value) => isValidCPF(value),
     }),
-  value: Yup.number("Deve ser um número")
+  value_transaction: Yup.number("Deve ser um número")
     .min(1, "Deve ser no mínimo 1")
     .required("É necessário informar o valor"),
   description: Yup.string("Deve ser uma string").required(
     "É necessário informar uma descrição"
   ),
-  option: Yup.number("Deve ser um número")
+  option_transaction: Yup.number("Deve ser um número")
     .min(2, "Deve ser no mínimo 2")
     .required("É necessário informar o valor"),
 });
