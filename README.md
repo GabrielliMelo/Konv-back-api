@@ -66,7 +66,7 @@
 	"cpf": "718.223.498-00",
 	"value_transaction": 100,
 	"option_transaction": 2, 
-	"description":"Texto qualquer"
+	"description":"Testando saque"
 }
 
 // Exemplo de resposta - Sucesso
