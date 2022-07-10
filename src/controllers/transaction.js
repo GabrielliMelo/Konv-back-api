@@ -4,112 +4,31 @@
         const TransactionService = require("../services/TransactionService");
 
         async function deposit(req, res) {
-            const { cpf, value, description } = req.body;
-          
-            await TransactionService.deposit({
-              cpf,
-              value,
-              description,
-            });
-          
-            return res.json({
-              status: 200,
-              mensagem: "Deposito realizado com sucesso!",
-            });
-          }
-
-        async function withdraw(req, res) {
             const {
                 cpf,
-                cliente_id,
-                valor,
-                type_transaction,
-                date_transaction,
-                opcao,
+                value,
                 description
             } = req.body;
 
-            try {
-                if (!cpf) {
-                    return res.status(400).json({
-                        mensagem: 'Preencha o cpf!'
-                    });
-                }
+            await TransactionService.deposit({
+                cpf,
+                value,
+                description,
+            });
 
-                if (!description) {
-                    return res.status(400).json({
-                        mensagem: 'Preencha a descricao!'
-                    });
-                }
+            return res.json({
+                status: 200,
+                mensagem: "Deposito realizado com sucesso!",
+            });
+        }
 
-                if (valor <= 0 || !valor) {
-                    return res.status(400).json({
-                        mensagem: 'Valor de deposito invalido!',
-                    });
-                }
+        async function withdraw(req, res) {
+            await TransactionService.withdraw(req.body);
 
-                if (!opcao) {
-                    return res.status(400).json({
-                        mensagem: 'Escolha uma opcao!',
-                    });
-                }
-                if (!isValidCPF(cpf)) {
-                    res.status(404).json({
-                        status: 404,
-                        message: "cpf invalido!"
-                    });
-                }
-
-
-                const verificarCPFExiste = await knex('clientes').where({
-                    cpf
-                }).first();
-
-                if (!verificarCPFExiste) {
-                    return res.status(404).json({
-                        status: 400,
-                        mensagem: 'Cpf nao encontrado no banco de dados!'
-                    });
-                }
-
-                if (verificarCPFExiste.saldo <= 0 || verificarCPFExiste.saldo < valor) {
-                    return res.status(404).json({
-                        status: 400,
-                        mensagem: 'Saldo insuficiente!'
-                    });
-                }
-
-                const {
-                    rowCount
-                } = await knex('clientes').where('id', verificarCPFExiste.id).update('saldo', verificarCPFExiste.saldo - valor);
-
-                if (rowCount === 0) {
-                    return res.status(500).json({
-                        status: 500,
-                        message: 'Erro ao sacar!'
-                    })
-                }
-
-                let date = new Date()
-
-                await knex('transactions').insert({
-                    cliente_id: verificarCPFExiste.id,
-                    date_transaction: `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`,
-                    hora: `${date.getHours()}:${date.getMinutes()}:${String(date.getSeconds()).length === 1? "0" + date.getSeconds() : date.getSeconds()}`,
-                    opcao,
-                    valor,
-                    description,
-                    type_transaction: "saque",
-                });
-
-                return res.json({
-                    status: 200,
-                    mensagem: 'Saque realizado com sucesso!'
-                });
-
-            } catch (error) {
-                return res.json(error.message);
-            }
+            return res.json({
+                status: 200,
+                mensagem: "Saque realizado com sucesso!",
+            });
         }
 
         async function extract(req, res) {

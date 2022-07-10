@@ -14,7 +14,13 @@ async function updateBalance({ clientId, value }) {
   return await knex("clientes").where("id", clientId).update("saldo", value);
 }
 
-async function createTransaction({ clientId, type, value, description }) {
+async function createTransaction({
+  clientId,
+  type,
+  value,
+  description,
+  option = 0,
+}) {
   let date = new Date();
   await knex("transactions").insert({
     cliente_id: clientId,
@@ -33,6 +39,7 @@ async function createTransaction({ clientId, type, value, description }) {
         : date.getSeconds()
     }`,
     type_transaction: type,
+    opcao: option,
     valor: value,
     description,
   });

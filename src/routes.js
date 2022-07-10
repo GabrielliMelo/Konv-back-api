@@ -6,7 +6,7 @@ const {
   options,
 } = require("./controllers/transaction");
 const validateSchemaMiddleware = require("./middlewares/valideSchemaMiddleware");
-const { makeDepositSchema } = require("./schemas/schemas");
+const { makeDepositSchema, makeWithdrawSchema } = require("./schemas/schemas");
 
 const routes = Router();
 
@@ -15,7 +15,11 @@ routes.get("/servidor", (req, res) => {
 });
 
 routes.post("/deposit", validateSchemaMiddleware(makeDepositSchema), deposit);
-routes.post("/withdraw", withdraw);
+routes.post(
+  "/withdraw",
+  validateSchemaMiddleware(makeWithdrawSchema),
+  withdraw
+);
 routes.get("/extract/:cpf", extract);
 routes.get("/options/:valor_saque", options);
 
