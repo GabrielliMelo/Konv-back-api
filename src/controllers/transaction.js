@@ -1,6 +1,3 @@
-        const knex = require("../db/connection");
-        const isValidCPF = require("../utills/isValidCPF")
-        const accountant = require("../utills/accountant")
         const TransactionService = require("../services/TransactionService");
 
         async function deposit(req, res) {
@@ -46,42 +43,17 @@
             });
           }
 
-        async function options(req, res) {
-
-            let {
-                valor_saque
-            } = req.params;
-            try {
-
-                return res.json({
-                    opcoes: [{
-                            opcao: accountant(valor_saque, 2)
-                        },
-                        {
-                            opcao: accountant(valor_saque, 3)
-                        },
-                        {
-                            opcao: accountant(valor_saque, 4)
-                        },
-                        {
-                            opcao: accountant(valor_saque, 5)
-                        },
-                        {
-                            opcao: accountant(valor_saque, 6)
-                        },
-                        {
-                            opcao: accountant(valor_saque, 7)
-                        },
-                    ]
-                });
-
-            } catch (error) {
-                return res.json(error.message);
-            }
-        }
+          async function getWithdrawOptions(req, res) {
+            let { withdrawValue } = req.params;
+          
+            const options = TransactionService.getWithdrawOptions(withdrawValue);
+          
+            return res.json(options);
+          }
+        
         module.exports = {
             deposit,
             withdraw,
             extract,
-            options
+            getWithdrawOptions
         }

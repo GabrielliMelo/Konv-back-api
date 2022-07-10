@@ -1,5 +1,5 @@
-const knex = require("../db/connection");
 const TransactionRepository = require("../repositories/TransactionRepository");
+const accountant = require("../utills/accountant");
 
 async function deposit({ cpf, value, description }) {
   const clientExists = await TransactionRepository.getClientByCpf(cpf);
@@ -81,8 +81,35 @@ async function extract({ cpf }) {
     transactionDeposit,
   };
 }
+
+function getWithdrawOptions(withdrawValue) {
+  return {
+    opcoes: [
+      {
+        opcao: accountant(withdrawValue, 2),
+      },
+      {
+        opcao: accountant(withdrawValue, 3),
+      },
+      {
+        opcao: accountant(withdrawValue, 4),
+      },
+      {
+        opcao: accountant(withdrawValue, 5),
+      },
+      {
+        opcao: accountant(withdrawValue, 6),
+      },
+      {
+        opcao: accountant(withdrawValue, 7),
+      },
+    ],
+  };
+}
+
 module.exports = {
   deposit,
   withdraw,
-  extract
+  extract,
+  getWithdrawOptions
 };

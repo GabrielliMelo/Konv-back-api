@@ -48,3 +48,9 @@ exports.generateExtractSchema = Yup.object({
       test: (value) => isValidCPF(value),
     }),
 });
+
+exports.getWithdrawOptionsSchema = Yup.object({
+  withdrawValue: Yup.number("Deve ser um número")
+    .min(2, "Deve ser no mínimo 2")
+    .required("É necessário informar o valor"),
+});
