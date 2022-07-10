@@ -1,16 +1,22 @@
-const express = require('express');
-const {deposit, withdraw, extract, options } = require("./controllers/transaction")
+const { Router } = require("express");
+const {
+  deposit,
+  withdraw,
+  extract,
+  options,
+} = require("./controllers/transaction");
+const validateSchemaMiddleware = require("./middlewares/valideSchemaMiddleware");
+const { makeDepositSchema } = require("./schemas/schemas");
 
-const routes = express();
+const routes = Router();
 
-routes.get('/servidor', (req, res)=>{
-    res.status(200).json({message: "Servidor ok!!"})
-})
+routes.get("/servidor", (req, res) => {
+  res.status(200).json({ message: "Servidor ok!!" });
+});
 
+routes.post("/deposit", validateSchemaMiddleware(makeDepositSchema), deposit);
+routes.post("/withdraw", withdraw);
+routes.get("/extract/:cpf", extract);
+routes.get("/options/:valor_saque", options);
 
-routes.post('/deposit', deposit);
-routes.post('/withdraw', withdraw );
-routes.get('/extract/:cpf', extract );
-routes.get('/options/:valor_saque', options );
-
-module.exports = routes
+module.exports = routes;
