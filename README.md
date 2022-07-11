@@ -61,6 +61,7 @@ Essa aplicação usa o [MySQL](https://www.mysql.com/
 ) database.
 
 ### .env
+Crie um arquivo chamado .env na raiz do projeto.
 Nesse arquivo você configura as variaveis de ambiente. Utilize os nomes das keys e coloque os valores referente ao que esta configurado na sua maquina.
 
 |key|description|default
