@@ -39,12 +39,7 @@ Todas transações são salvas no banco de dados com as respectivas informacões
 $ git clone git@github.com:GabrielliMelo/Konv-back-api.git
 ```
 
-- Segundo: va para a pasta src
-```
-$ cd ./src
-```
-
-- Terceiro: instale as dependencias
+- Segundo: instale as dependencias
 
 ```shell
 $ yarn
@@ -54,6 +49,12 @@ Or:
 ```shell
 $ npm install
 ```
+
+- Terceiro : va para a pasta src
+```
+$ cd ./src
+```
+
 ## Configurando
 
 Essa aplicação usa o [MySQL](https://www.mysql.com/
