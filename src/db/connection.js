@@ -2,10 +2,10 @@
 const knex = require('knex')({
     client: 'mysql2',
       connection: {
-        host: 'localhost',
-        user: 'root',
-        password: 'root',
-        database: 'konv_transactions'
+        host: process.env.HOST_DB,
+        user: process.env.USER_DB,
+        password: process.env.PASSWORD_DB,
+        database: process.env.DATABASE
       },
       pool: {
          min: 2,

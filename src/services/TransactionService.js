@@ -141,7 +141,7 @@ async function transfer({
   let clientExists = await TransactionRepository.getClientByCpf(cpf);
 
   if (clientExists.balance === 0 || clientExists.balance < value_transaction) {
-    throw new Error("Salvo insuficiente")
+    throw new Error("Saldo insuficiente")
   }
   
   let clientTransferExists = await TransactionRepository.getClientByCpf(cpf_transfer);
