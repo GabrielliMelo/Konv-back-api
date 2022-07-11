@@ -40,7 +40,7 @@
         async function extract(req, res) {
             const { cpf } = req.params;
           
-            const { allTransactionsCpf, transactionDeposit, transactionswithdraw } =
+            const { allTransactionsCpf, transactionDeposit, transactionswithdraw, transactionTransfer } =
               await TransactionService.extract({
                 cpf,
               });
@@ -49,6 +49,7 @@
               allTransactionsCpf,
               transactionswithdraw,
               transactionDeposit,
+              transactionTransfer
             });
         }
 

@@ -97,10 +97,16 @@ async function extract({
     clientId: clientExists.id,
   });
 
+  const transactionTransfer = await TransactionRepository.getTransactionsByType({
+    type: "Transferencia",
+    clientId: clientExists.id,
+  });
+
   return {
     allTransactionsCpf,
     transactionswithdraw,
     transactionDeposit,
+    transactionTransfer
   };
 }
 
